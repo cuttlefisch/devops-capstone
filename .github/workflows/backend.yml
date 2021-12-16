@@ -1,0 +1,80 @@
+name: Todo Backend
+
+on: [push, workflow_dispatch]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
+          working-directory: todo-backend
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+      - run: make dependencies
+        working-directory: todo-backend
+      - run: make test
+        working-directory: todo-backend
+
+  database-migrations:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    environment: production
+    needs:
+      - test
+      - lint
+    steps:
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update &&
+          sudo apt-get install --yes postgresql-client
+      - uses: actions/checkout@v2
+      - name: Configure AWS cli
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Allow connection from GH Actions to RDS
+        run: |
+          IP_ADDR=$(curl icanhazip.com)
+          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.SECURITY_GROUP_ID }} --protocol tcp --port 5432 --cidr ${IP_ADDR}/32
+      - name: Run database migrations
+        run: for i in ./db-init/*; do echo "Executing script $i..."; bash $i; done
+        working-directory: todo-backend
+        env:
+          POSTGRES_ADDRESS: ${{ secrets.POSTGRES_ADDRESS }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_ADMIN_USERNAME }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          POSTGRES_APP_PASSWORD: ${{ secrets.POSTGRES_APP_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DATABASE }}
+      - name: Revoke connection from GH Actions to RDS
+        run: |
+          IP_ADDR=$(curl icanhazip.com)
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.SECURITY_GROUP_ID }} --protocol tcp --port 5432 --cidr ${IP_ADDR}/32
+        if:  always()
+
+  deploy:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    environment: production
+    needs:
+      - database-migrations
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure AWS cli
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - uses: actions/setup-go@v2
+      - name: Build
+        working-directory: todo-backend
+        run: make dist

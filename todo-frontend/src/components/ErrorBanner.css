@@ -1,0 +1,12 @@
+.error-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  background: red;
+  color: white;
+  font-size: 18px;
+  line-height: 40px;
+  font-weight: bold;
+  text-align: center;
+}

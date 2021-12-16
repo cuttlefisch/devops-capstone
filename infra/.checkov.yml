@@ -1,0 +1,10 @@
+skip-check:
+  - CKV2_AWS_28
+  - CKV2_AWS_30
+  - CKV_AWS_109
+  - CKV_AWS_111
+  - CKV_AWS_118
+  - CKV_AWS_129
+  - CKV_AWS_144
+  - CKV_AWS_145
+  - CKV_AWS_150

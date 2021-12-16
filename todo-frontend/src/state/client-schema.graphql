@@ -1,0 +1,15 @@
+type Pagination {
+  currentPage: Int!
+  pageSize: Int!
+  pagesCount: Int!
+}
+
+type VisibilityFilter {
+  id: String!
+  displayName: String!
+}
+
+extend type Query {
+  pagination: Pagination!
+  visibilityFilter: VisibilityFilter!
+}

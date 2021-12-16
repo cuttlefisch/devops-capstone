@@ -1,0 +1,22 @@
+documents:
+  - src/operations/**/*.ts
+
+overwrite: true
+
+# schema: ${REMOTE_SCHEMA_URL}
+
+generates:
+  src/state/generated/index.tsx:
+    schema:
+      - ../todo-backend/graph/schema.graphqls
+      - src/state/client-schema.graphql
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-react-apollo"
+      - "typescript-resolvers"
+    config:
+      withHOC: false
+      withHooks: true
+      withComponent: false
+      useIndexSignature: true

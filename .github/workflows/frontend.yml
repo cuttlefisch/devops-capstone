@@ -1,0 +1,59 @@
+name: Todo Frontend
+
+on: [push, workflow_dispatch]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: lts/*
+      - name: Install Dependencies
+        run: yarn install
+        working-directory: todo-frontend
+      - run: yarn lint
+        working-directory: todo-frontend
+      - run: yarn type-check
+        working-directory: todo-frontend
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: lts/*
+      - name: Install Dependencies
+        run: yarn install
+        working-directory: todo-frontend
+      - run: yarn test --ci --collect-coverage --verbose
+        working-directory: todo-frontend
+
+  deploy:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    environment: production
+    needs:
+      - test
+      - lint
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure AWS cli
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - uses: actions/setup-node@v2
+        with:
+          node-version: lts/*
+      - name: Install Dependencies
+        run: yarn install
+        working-directory: todo-frontend
+      - name: Build static files
+        run: yarn build
+        working-directory: todo-frontend
+        env:
+          GATSBY_REMOTE_SCHEMA_URL: ${{ secrets.GATSBY_REMOTE_SCHEMA_URL }}

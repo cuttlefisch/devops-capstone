@@ -1,0 +1,46 @@
+# GraphQL schema
+#
+# https://gqlgen.com/getting-started/
+
+type PageInfo {
+  startCursor: ID!
+  endCursor: ID!
+  hasNextPage: Boolean
+}
+
+type Todo {
+  id: ID!
+  title: String!
+  completed: Boolean!
+}
+
+type TodoConnection {
+  edges: [TodoEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int
+}
+
+type TodoEdge {
+  cursor: ID!
+  node: Todo!
+}
+
+type Query {
+  todo(id: ID!): Todo
+  todos(first: Int = 20, after: ID): TodoConnection!
+}
+
+input NewTodo {
+  title: String!
+}
+
+input UpdateTodo {
+    title: String
+    completed: Boolean
+}
+
+type Mutation {
+  createTodo(input: NewTodo!): Todo!
+  updateTodo(id: ID!, input: UpdateTodo!): Todo!
+  deleteTodo(id: ID!): Todo!
+}
