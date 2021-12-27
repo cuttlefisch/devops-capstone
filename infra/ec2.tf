@@ -52,10 +52,11 @@ data "aws_ami" "ubuntu" {
 
 resource "aws_instance" "backend_server" {
   #checkov:skip=CKV_AWS_88:Allow public IP for ssh access deploy since we don't have access to private GH Actions runners
-  count         = length(data.aws_availability_zones.available.names)
-  depends_on    = [aws_route_table.main]
-  tags          = var.aws_tags
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = "t3.micro"
-  subnet_id     = aws_subnet.main[count.index].id
+  count                       = length(data.aws_availability_zones.available.names)
+  depends_on                  = [aws_route_table.main]
+  tags                        = var.aws_tags
+  ami                         = data.aws_ami.ubuntu.id
+  instance_type               = "t3.micro"
+  subnet_id                   = aws_subnet.main[count.index].id
+  associate_public_ip_address = true
 }

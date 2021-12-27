@@ -38,8 +38,9 @@ resource "aws_lb_target_group_attachment" "backend_server_8080" {
   count = length(aws_instance.backend_server)
 
   target_group_arn = aws_lb_target_group.backend_server_8080.arn
-  target_id        = aws_instance.backend_server.*.id[count.index]
-  port             = 8080
+  # target_id        = aws_instance.backend_server[count.index].id # TODO make multiple [count.index]
+  target_id = aws_instance.backend_server.*.id[count.index]
+  port      = 8080
 }
 
 resource "aws_lb_listener" "backend_server_443" {
