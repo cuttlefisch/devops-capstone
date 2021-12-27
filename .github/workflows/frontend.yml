@@ -58,4 +58,5 @@ jobs:
         env:
           GATSBY_REMOTE_SCHEMA_URL: ${{ secrets.GATSBY_REMOTE_SCHEMA_URL }}
       - name: Deploy S3 files
-        run: yarn build && aws s3 cp public s3://${{ secrets.S3_BUCKET_NAME  }}/ --recursive --acl public-read
+        working-directory: todo-frontend
+        run: aws s3 cp public s3://${{ secrets.S3_BUCKET_NAME  }}/ --recursive --acl public-read
