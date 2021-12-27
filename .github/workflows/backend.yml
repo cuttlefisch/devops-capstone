@@ -78,3 +78,39 @@ jobs:
       - name: Build
         working-directory: todo-backend
         run: make dist
+      - name: Configure SSH
+        working-directory: todo-backend
+        run:  printf ${{ secrets.BASE64_SSH_PRIVATE_KEY }} | base64 -d > private_key && chmod 0600 private_key
+      - name: deploy env file
+        working-directory: todo-backend
+        run: envsubst < .env.template > dist/todo.env
+        env:
+          APP_BIND_ADDRESS: 0.0.0.0:8080
+          POSTGRES_ADDRESS: ${{ secrets.POSTGRES_ADDRESS }}
+          POSTGRES_USERNAME: ${{ secrets.POSTGRES_APP_USERNAME }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_APP_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DATABASE }}
+      - name: deploy to ec2
+        working-directory: todo-backend
+        run: |
+          for i in ${{ secrets.EC2_INSTANCE_IPS }}; do
+            echo "Starting deploy to $i...";
+            echo "  Stopping service if running...";
+            ssh -i ./private_key -o StrictHostKeyChecking=no ${{ secrets.EC2_INSTANCE_USER }}@$i 'sudo systemctl is-active --quiet todo && sudo systemctl stop todo || exit 0';
+            echo "  Copying files to instance...";
+            scp -ri ./private_key dist ${{ secrets.EC2_INSTANCE_USER }}@$i:~/todo;
+            echo "  Moving files into place on instance...";
+            ssh -i ./private_key ${{ secrets.EC2_INSTANCE_USER }}@$i '
+              sudo rm -rf /opt/todo &&
+              sudo mv ~/todo /opt/todo &&
+              sudo ln -sfn /opt/todo/todo /usr/local/bin/todo &&
+              sudo ln -sfn /opt/todo/todo.service /etc/systemd/system/todo.service &&
+              sudo systemctl daemon-reload';
+          done
+        run: |
+          for i in ${{ secrets.EC2_INSTANCE_IPS }}; do
+            echo "Starting service on $i...";
+            ssh -i ./private_key ${{ secrets.EC2_INSTANCE_USER }}@$i 'sudo systemctl is-enabled --quiet todo || sudo systemctl enable todo';
+            ssh -i ./private_key ${{ secrets.EC2_INSTANCE_USER }}@$i 'sudo systemctl start todo';
+            ssh -i ./private_key ${{ secrets.EC2_INSTANCE_USER }}@$i 'sudo systemctl is-active --quiet todo';
+          done
