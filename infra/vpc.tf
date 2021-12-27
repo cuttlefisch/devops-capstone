@@ -1,4 +1,13 @@
-data "aws_availability_zones" "available" {}
+data "aws_availability_zones" "available" {
+  filter {
+    name   = "opt-in-status"
+    values = ["opt-in-not-required"]
+  }
+  filter {
+    name   = "zone-name"
+    values = ["us-west-2a", "us-west-2b"]
+  }
+}
 
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"

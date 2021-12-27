@@ -14,7 +14,7 @@ variable "github_token" {
 
 variable "github_repo" {
   type    = string
-  default = "devops-academy-capstone"
+  default = "devops-capstone"
 }
 
 variable "github_user" {
@@ -47,4 +47,3 @@ variable "aws_tags" {
     app = "todo"
   }
 }
-
