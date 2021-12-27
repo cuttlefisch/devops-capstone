@@ -90,7 +90,7 @@ jobs:
           POSTGRES_USERNAME: ${{ secrets.POSTGRES_APP_USERNAME }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_APP_PASSWORD }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DATABASE }}
-      - name: deploy to ec2
+      - name: Deploy to ec2
         working-directory: todo-backend
         run: |
           for i in ${{ secrets.EC2_INSTANCE_IPS }}; do
@@ -107,6 +107,8 @@ jobs:
               sudo ln -sfn /opt/todo/todo.service /etc/systemd/system/todo.service &&
               sudo systemctl daemon-reload';
           done
+      - name: Start services in ec2
+        working-directory: todo-backend
         run: |
           for i in ${{ secrets.EC2_INSTANCE_IPS }}; do
             echo "Starting service on $i...";
