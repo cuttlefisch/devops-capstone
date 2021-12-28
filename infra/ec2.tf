@@ -12,28 +12,21 @@ resource "aws_security_group" "backend_server" {
   }
 
   ingress {
-    from_port   = 0
+    from_port   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port   = 0
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = [aws_vpc.main.cidr_block]
-  }
-
-  ingress {
-    from_port   = 0
+    from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = [aws_vpc.main.cidr_block]
   }
 
   ingress {
-    from_port   = 0
+    from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
@@ -59,4 +52,12 @@ resource "aws_instance" "backend_server" {
   instance_type               = "t3.micro"
   subnet_id                   = aws_subnet.main[count.index].id
   associate_public_ip_address = true
+  security_groups             = ["${aws_security_group.backend_server.id}"]
+  key_name                    = aws_key_pair.ssh_key.key_name
 }
+
+# resource "aws_key_pair" "backend-key" {
+#   key_name   = "backend-key"
+#   public_key = data.github_actions_public_key.capstone.key
+
+# }

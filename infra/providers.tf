@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 3.0"
     }
+    postgresql = {
+      source  = "cyrilgdn/postgresql"
+      version = "1.14.0"
+    }
   }
 }
 
@@ -19,4 +23,13 @@ data "aws_caller_identity" "current" {}
 provider "github" {
   token = var.github_token # or `${GITHUB_TOKEN}`
   owner = var.github_user
+}
+
+provider "postgresql" {
+  host             = aws_db_instance.postgres.address
+  username         = "CHANGEME"
+  password         = var.postgres_admin_pass
+  sslmode          = "require"
+  superuser        = true
+  expected_version = aws_db_instance.postgres.engine_version
 }

@@ -47,3 +47,8 @@ variable "aws_tags" {
     app = "todo"
   }
 }
+
+
+# data "postgres_admin_pass" {
+#   value = random_password.postgres_app_password.result
+# }
