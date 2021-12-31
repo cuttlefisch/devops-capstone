@@ -49,15 +49,9 @@ resource "aws_instance" "backend_server" {
   depends_on                  = [aws_route_table.main]
   tags                        = var.aws_tags
   ami                         = data.aws_ami.ubuntu.id
-  instance_type               = "t3.micro"
+  instance_type               = var.aws_ec2_instance_type
   subnet_id                   = aws_subnet.main[count.index].id
   associate_public_ip_address = true
   security_groups             = ["${aws_security_group.backend_server.id}"]
   key_name                    = aws_key_pair.ssh_key.key_name
 }
-
-# resource "aws_key_pair" "backend-key" {
-#   key_name   = "backend-key"
-#   public_key = data.github_actions_public_key.capstone.key
-
-# }
