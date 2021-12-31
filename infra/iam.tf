@@ -9,7 +9,6 @@ resource "aws_iam_role" "project" {
   tags               = var.aws_tags
 }
 
-# TODO https://learn.hashicorp.com/terraform/aws/iam-policy
 data "aws_iam_policy_document" "assume_role" {
 
   statement {

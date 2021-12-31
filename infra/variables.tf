@@ -39,6 +39,11 @@ variable "aws_ec2_username" {
   default = "ubuntu"
 }
 
+variable "aws_ec2_instance_type" {
+  type    = string
+  default = "t3.micro"
+}
+
 variable "aws_tags" {
   type = object({
     app = string
@@ -47,8 +52,3 @@ variable "aws_tags" {
     app = "todo"
   }
 }
-
-
-# data "postgres_admin_pass" {
-#   value = random_password.postgres_app_password.result
-# }

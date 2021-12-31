@@ -7,7 +7,7 @@ resource "aws_s3_bucket" "frontend" {
   #checkov:skip=CKV_AWS_21:Versioning of websited is handled through git
   #checkov:skip=CKV_AWS_145:Don't encrypt publicly accessible website
   bucket        = "frontend-app-${random_uuid.random_id.result}"
-  acl           = "public-read" # REVIEW
+  acl           = "public-read"
   force_destroy = true
   versioning {
     enabled = true

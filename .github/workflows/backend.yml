@@ -23,7 +23,7 @@ jobs:
         working-directory: todo-backend
 
   database-migrations:
-    if: ${{ github.ref == 'refs/heads/main' }}
+    # if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     environment: production
     needs:
@@ -61,7 +61,7 @@ jobs:
         if:  always()
 
   deploy:
-    if: ${{ github.ref == 'refs/heads/main' }}
+    # if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     environment: production
     needs:

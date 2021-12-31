@@ -15,10 +15,8 @@ resource "random_password" "postgres_app_password" {
 }
 
 
-# REVIEW may need to use count for specified azs
 resource "aws_db_instance" "postgres" {
   #checkov:skip=CKV_AWS_17:Create public IP because we don't have access to private GH Actions runners
-  # count                = length(data.aws_availability_zones.available)
   name                                = "todobackenddb"
   apply_immediately                   = true
   engine                              = "postgres"
@@ -34,7 +32,6 @@ resource "aws_db_instance" "postgres" {
   backup_retention_period             = 0
   final_snapshot_identifier           = "backend-db-final-snapshot"
   vpc_security_group_ids              = [aws_security_group.postgres-sg.id]
-  # availability_zone    = data.aws_availability_zones.available[count.index]
 
   lifecycle {
     ignore_changes = [
@@ -53,7 +50,7 @@ resource "aws_security_group" "postgres-sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # TODO switch to private subnet
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -63,26 +60,3 @@ resource "aws_security_group" "postgres-sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
-# resource "postgresql_role" "app_role" {
-#   name        = "todo_app"
-#   login       = true
-#   password    = var.postgres_admin_pass # random_password.postgres_app_password.result
-#   create_role = true
-#   provider    = postgresql
-# }
-
-# # resource "postgresql_role" "application_role" {
-# #   name               = "todo_app"
-# #   login              = true
-# #   password           = random_password.postgres_app_password.result
-# #   encrypted_password = false
-# #   depends_on         = [aws_db_instance.postgres]
-# # }
-
-# resource "postgresql_database" "dev_db" {
-#   name              = "todo-database"
-#   owner             = postgresql_role.app_role.name
-#   allow_connections = true
-#   provider          = postgresql
-# }
