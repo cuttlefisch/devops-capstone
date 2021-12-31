@@ -24,3 +24,12 @@ provider "github" {
   token = var.github_token # or `${GITHUB_TOKEN}`
   owner = var.github_user
 }
+
+provider "postgresql" {
+  host             = aws_db_instance.postgres.address
+  username         = "CHANGEME"
+  password         = var.postgres_admin_pass
+  sslmode          = "require"
+  superuser        = true
+  expected_version = aws_db_instance.postgres.engine_version
+}
